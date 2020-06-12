@@ -11,10 +11,12 @@ import SceneKit
 import ARKit
 
 class ViewController: UIViewController, ARSCNViewDelegate {
-
+    
     @IBOutlet var sceneView: ARSCNView!
     
     var dotNodes = [SCNNode]()
+    
+    var textNode = SCNNode()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,7 +41,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
-
+        
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -53,6 +55,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         
+        if dotNodes.count >= 2 {
+            for dot in dotNodes{
+                dot.removeFromParentNode()
+            }
+            
+            dotNodes = [SCNNode]()
+        }
+        
         if let touchLocation = touches.first?.location(in: sceneView){
             let hitTestResults = sceneView.hitTest(touchLocation, types: .featurePoint)
             
@@ -62,7 +72,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
-
+    
     func addDot(at hitResult: ARHitTestResult){
         let dotGeometry = SCNSphere(radius: 0.005)
         let material = SCNMaterial()
@@ -89,18 +99,22 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let end = dotNodes[1]
         
         let distance = sqrt(pow(start.position.x - end.position.x, 2) + pow(start.position.y - end.position.y, 2)
-        + pow(start.position.z - end.position.z, 2))
+            + pow(start.position.z - end.position.z, 2))
         
         updateText(text: "\(distance)", endPoint: end.position)
     }
     
     func updateText(text: String, endPoint: SCNVector3){
         
+        
+        
         let textGeometry = SCNText(string: text, extrusionDepth: 1.0)
+        
+        textNode.removeFromParentNode()
         
         textGeometry.firstMaterial?.diffuse.contents = UIColor.red
         
-        let textNode = SCNNode(geometry: textGeometry)
+        textNode = SCNNode(geometry: textGeometry)
         
         textNode.position = SCNVector3(endPoint.x, endPoint.y + 0.01, endPoint.z)
         
@@ -110,4 +124,4 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
 }
 
-    
+
